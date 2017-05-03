@@ -118,7 +118,7 @@
         android:layout_alignStart="@+id/percentTextView"
         android:layout_below="@+id/percentTextView"
         android:layout_marginTop="10dp"
-        android:max="25"
+        android:max="30"
         android:progress="15" />
 
 </RelativeLayout>
