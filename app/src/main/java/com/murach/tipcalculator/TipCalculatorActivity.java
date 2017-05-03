@@ -4,27 +4,26 @@ import java.text.NumberFormat;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
-import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
 public class TipCalculatorActivity extends Activity
-        implements OnEditorActionListener, OnClickListener {
+{
 
     // define variables for the widgets
     private EditText billAmountEditText;
     private TextView percentTextView;
-    private Button   percentUpButton;
-    private Button   percentDownButton;
     private TextView tipTextView;
     private TextView totalTextView;
+    private SeekBar tipPercentSeekBar;
 
     // define the SharedPreferences object
     private SharedPreferences savedValues;
@@ -36,31 +35,32 @@ public class TipCalculatorActivity extends Activity
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_tip_calculator);
+        this.setContentView(R.layout.activity_tip_calculator);
 
         // get references to the widgets
-        billAmountEditText = (EditText) findViewById(R.id.billAmountEditText);
-        percentTextView = (TextView) findViewById(R.id.percentTextView);
-        percentUpButton = (Button) findViewById(R.id.percentUpButton);
-        percentDownButton = (Button) findViewById(R.id.percentDownButton);
-        tipTextView = (TextView) findViewById(R.id.tipTextView);
-        totalTextView = (TextView) findViewById(R.id.totalTextView);
+        this.billAmountEditText = (EditText) this.findViewById(R.id.billAmountEditText);
+        this.percentTextView =    (TextView) this.findViewById(R.id.percentTextView);
+        this.tipTextView =        (TextView) this.findViewById(R.id.tipTextView);
+        this.totalTextView =      (TextView) this.findViewById(R.id.totalTextView);
+        this.tipPercentSeekBar =  (SeekBar) this.findViewById(R.id.tipPercentSeekBar);
 
         // set the listeners
-        billAmountEditText.setOnEditorActionListener(this);
-        percentUpButton.setOnClickListener(this);
-        percentDownButton.setOnClickListener(this);
+        this.billAmountEditText.setOnEditorActionListener(this.genericTextboxSubmitEvent);
+        this.billAmountEditText.addTextChangedListener(this.genericTextboxInteractEvent);
+        this.tipPercentSeekBar.setOnSeekBarChangeListener(this.genericSeekbarInteractEvent);
+
+
 
         // get SharedPreferences object
-        savedValues = getSharedPreferences("SavedValues", MODE_PRIVATE);
+        this.savedValues = this.getSharedPreferences("SavedValues", MODE_PRIVATE);
     }
 
     @Override
     public void onPause() {
         // save the instance variables       
         Editor editor = savedValues.edit();
-        editor.putString("billAmountString", billAmountString);
-        editor.putFloat("tipPercent", tipPercent);
+        editor.putString("billAmountString", this.billAmountString);
+        editor.putFloat("tipPercent", this.tipPercent);
         editor.commit();
 
         super.onPause();
@@ -84,13 +84,13 @@ public class TipCalculatorActivity extends Activity
     public void calculateAndDisplay() {
 
         // get the bill amount
-        billAmountString = billAmountEditText.getText().toString();
+        this.billAmountString = billAmountEditText.getText().toString();
         float billAmount;
-        if (billAmountString.equals("")) {
+        if (this.billAmountString.equals("")) {
             billAmount = 0;
         }
         else {
-            billAmount = Float.parseFloat(billAmountString);
+            billAmount = Float.parseFloat(this.billAmountString);
         }
 
         // calculate tip and total 
@@ -99,33 +99,62 @@ public class TipCalculatorActivity extends Activity
 
         // display the other results with formatting
         NumberFormat currency = NumberFormat.getCurrencyInstance();
-        tipTextView.setText(currency.format(tipAmount));
-        totalTextView.setText(currency.format(totalAmount));
+        this.tipTextView.setText(currency.format(tipAmount));
+        this.totalTextView.setText(currency.format(totalAmount));
 
+        // update the tip percentage views
         NumberFormat percent = NumberFormat.getPercentInstance();
-        percentTextView.setText(percent.format(tipPercent));
+        this.tipPercentSeekBar.setProgress((int) (tipPercent * 100));
+        this.percentTextView.setText(percent.format(tipPercent));
+
     }
 
-    @Override
-    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-        if (actionId == EditorInfo.IME_ACTION_DONE ||
-                actionId == EditorInfo.IME_ACTION_UNSPECIFIED) {
-            calculateAndDisplay();
-        }
-        return false;
-    }
+    TextWatcher genericTextboxInteractEvent = new TextWatcher()
+    {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.percentDownButton:
-                tipPercent = tipPercent - .01f;
-                calculateAndDisplay();
-                break;
-            case R.id.percentUpButton:
-                tipPercent = tipPercent + .01f;
-                calculateAndDisplay();
-                break;
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
+        {
+            TipCalculatorActivity.this.calculateAndDisplay();
         }
-    }
+
+        @Override
+        public void afterTextChanged(Editable editable) { }
+    };
+
+    OnEditorActionListener genericTextboxSubmitEvent = new OnEditorActionListener()
+    {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event)
+        {
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_UNSPECIFIED)
+            {
+                TipCalculatorActivity.this.calculateAndDisplay();
+            }
+            return false;
+        }
+    };
+
+    SeekBar.OnSeekBarChangeListener genericSeekbarInteractEvent = new SeekBar.OnSeekBarChangeListener()
+    {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+        {
+            // Because the Tip Percentage seek bar can be updated by code, ensure
+            // that this input is indeed from the user before calling controller code.
+            if(fromUser)
+            {
+                TipCalculatorActivity.this.tipPercent = TipCalculatorActivity.this.tipPercentSeekBar.getProgress() / 100.0f;
+                TipCalculatorActivity.this.calculateAndDisplay();
+            }
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) { }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) { }
+    };
 }

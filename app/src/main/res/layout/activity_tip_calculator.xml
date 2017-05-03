@@ -45,9 +45,10 @@
         android:id="@+id/percentLabel"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:layout_alignBottom="@+id/percentDownButton"
+        android:layout_below="@+id/billAmountEditText"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="14dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -59,26 +60,6 @@
         android:layout_alignStart="@+id/billAmountEditText"
         android:textSize="20sp" />
 
-    <Button
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:text="@string/decrease"
-        android:id="@+id/percentDownButton"
-        android:layout_below="@+id/billAmountEditText"
-        android:layout_toLeftOf="@+id/percentUpButton"
-        android:layout_toStartOf="@+id/percentUpButton"
-        android:textSize="20sp" />
-
-    <Button
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:text="@string/increase"
-        android:id="@+id/percentUpButton"
-        android:layout_alignTop="@+id/percentDownButton"
-        android:layout_alignRight="@+id/billAmountEditText"
-        android:layout_alignEnd="@+id/billAmountEditText"
-        android:textSize="20sp" />
-
     <!-- The tip amount -->
 
     <TextView
@@ -88,8 +69,8 @@
         android:id="@+id/tipLabel"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:layout_marginTop="23dp"
-        android:layout_below="@+id/percentDownButton"
+        android:layout_marginTop="14dp"
+        android:layout_below="@+id/tipPercentSeekBar"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
@@ -126,5 +107,18 @@
         android:layout_alignTop="@+id/totalLabel"
         android:layout_alignLeft="@+id/tipTextView"
         android:layout_alignStart="@+id/tipTextView" />
+
+    <SeekBar
+        android:id="@+id/tipPercentSeekBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/percentTextView"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignStart="@+id/percentTextView"
+        android:layout_below="@+id/percentTextView"
+        android:layout_marginTop="10dp"
+        android:max="25"
+        android:progress="15" />
 
 </RelativeLayout>
